@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Fragment</string>
+    <string name="Button1">点击事件</string>
+    <string name="Button2">返 回</string>
+    <string name="TextView">This is the right fragment</string>
+    <string name="TextView2">This is another right fragment</string>
+</resources>
