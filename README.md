@@ -47,3 +47,129 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 RightFragment rightFragment = (RightFragment) getFragmentManager().findFragmentById(R.id.right_layout);
 ```
 #### 調用FragmentManager的findFragmentById()方法，可以在活動中得到相應碎片的實例，然後就能輕鬆地調用碎片裡面的方法了
+
+### 在碎片中調用活動的方法
+* 每個碎片都可以通過調用getActivity()方法來得到和當前碎片相關聯的活動實例
+ * 代碼如下：
+```java
+MainActivity activity = (MainActivity)getActivity();
+```
+#### 有了活動的實例之後就能在碎片中調用方法了
+#### 另外，當碎片中需要使用Context對象時，也可以使用getActivity()方法，因為獲取到的活動本身就是一個Context對象
+
+### 碎片與碎片之間的通信
+* 思路
+ * 第一：在一個碎片中可以得到與它相關聯的活動
+  * 第二：通過這個活動去獲取另外一個碎片的實例
+* 如此也就實現了兩個碎片之間的通信的功能
+# 碎片的生命週期
+![碎片生命週期](http://i1.piimg.com/567571/d64e6a7daa36eb03.png)
+## 碎片的狀態和回調
+* 每個活動的聲明週期內有4種狀態
+* 類似地，在碎片的生命週期內也有這幾種狀態，但是細節方面會有一些小的差別
+ * 運行狀態
+ 當碎片是可見的，並且它所關聯的活動正處於運行狀態的時候，該碎片也處於運行狀態。
+  * 暫停狀態
+   * 當一個活動進入暫停狀態時(由於另一個未佔滿屏幕的活動被添加到棧頂)，與它相關聯的可見碎片就會進入到暫停狀態。
+   * 停止狀態
+    * 當一個活動進入停止狀態的時候，與它相關聯的碎片就會進入到停止狀態，或者通過調用FragmentTransaction的remove()，replace()方法將碎片從活動移除。但是，如果在事務提交之前調用addToBackStack()方法，這時的碎片也會進入到停止狀態。總的來說，進入到停止狀態的碎片對用戶來說是完全不可見的，有可能會被系統回收。
+    * 銷毀狀態
+     * 銷毀狀態總是依附于活動而存在的，因此當活動被銷毀的時候，與它相關的碎片就會進入到銷毀狀態。或者通過調用FragmentTransaction的remove()、replace()方法將碎片從活動中移除，但在事務提交之前并沒有調用addToBackStack()方法，這時的碎片也會進入到銷毀狀態。
+* 結合之前的活動狀態，Fragment類中也提供了一系列的回調方法，以覆蓋碎片生命週期的每個環節。其中，活動中有回調方法，碎片中幾乎都有，不過碎片還提供了一些附加的回調方法，那我們的重點就是看一下這幾種回調方式：
+ * onAttach()。*當碎片和活動建立關聯得到時候調用*
+ * onCreateView()。*為碎片創建視圖(加載佈局)時調用*
+ * onActivityCreated()。*當與碎片關聯的視圖被移除的時候調用*
+ * onDetach()。*當碎片和活動解除關聯的時候調用*
+### 那麼我們就體驗一下碎片的生命週期吧
+* 源代碼如下所示：
+```java
+package com.example.dell.fragment;
+
+
+import android.content.Context;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+/*
+ * Created by DELL on 2017/3/13.
+ */
+
+public class RightFragment extends Fragment {
+    public static final String TAG = "RightFragment";
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        Log.d(TAG,"onAttach");
+    }
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG,"onCreate");
+    }
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG,"onCreateView");
+        View view = inflater.inflate(R.layout.right_fragment, container, false);
+        RightFragment rightFragment = (RightFragment) getFragmentManager().findFragmentById(R.id.right_layout);
+        MainActivity activity = (MainActivity) getActivity();
+        return view;
+    }
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG,"onActivityCreated");
+    }
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Log.d(TAG,"ONSTART");
+    }
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        Log.d(TAG,"onResume");
+    }
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.d(TAG,"onPause");
+    }
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        Log.d(TAG,"onStop");
+    }
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        Log.d(TAG,"onDestroyView");
+    }
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        Log.d(TAG,"onDestroy");
+    }
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        Log.d(TAG,"onDetach");
+    }
+}
+
+```
+#### 我們在RightFragment中的每一個回調方法中都加入了打印日誌的代碼，然後運行程序，在logcat中可以看到打印信息：
+！[重寫回調方法](http://p1.bqimg.com/567571/c0f988cbdf531fa2.png)
