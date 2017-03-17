@@ -85,7 +85,6 @@ MainActivity activity = (MainActivity)getActivity();
 ```java
 package com.example.dell.fragment;
 
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -172,4 +171,4 @@ public class RightFragment extends Fragment {
 
 ```
 #### 我們在RightFragment中的每一個回調方法中都加入了打印日誌的代碼，然後運行程序，在logcat中可以看到打印信息：
-！[重寫回調方法](http://p1.bqimg.com/567571/c0f988cbdf531fa2.png)
+![重寫回調方法](http://p1.bqimg.com/567571/c0f988cbdf531fa2.png)
