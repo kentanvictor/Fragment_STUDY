@@ -84,7 +84,6 @@ MainActivity activity = (MainActivity)getActivity();
 * 源代碼如下所示：
 ```java
 package com.example.dell.fragment;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -92,11 +91,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-/*
- * Created by DELL on 2017/3/13.
+/**
+  Created by DELL on 2017/3/13.
  */
-
 public class RightFragment extends Fragment {
     public static final String TAG = "RightFragment";
     @Override
@@ -168,7 +165,43 @@ public class RightFragment extends Fragment {
         Log.d(TAG,"onDetach");
     }
 }
-
 ```
 #### 我們在RightFragment中的每一個回調方法中都加入了打印日誌的代碼，然後運行程序，在logcat中可以看到打印信息：
 ![重寫回調方法](http://p1.bqimg.com/567571/c0f988cbdf531fa2.png)
+
+>**注：**由於AnotherRightFragment替換了RightFragment，此時的RightFragment進入了停止狀態，因此onPause()、onStop()和onDestroyView()方法會得到執行。當然如果在替換的時候沒有調用addToBackStack()方法，此時的RightFragment就會進入銷毀狀態，onDestroy()和onDetach()方法會得到執行。**
+
+## 動態加載佈局的技巧
+* 雖然動態添加碎片的功能很強大，可以解決很多實際開發中的問題，但是它畢竟只是在一個佈局文件中進行一些添加和替換操作。如果程序能夠根據設備的分辨率或屏幕大小在運行時來決定加載哪個佈局，那我們可發揮的空間就更多了。
+### 使用限定符
+* 現如今很多平板都採用雙頁模式(**即為程序會在作左側的面板上顯示一個包含自相的列表，在右側的面板顯示內容**)，因為平板的屏幕足夠大，所以完全可以顯示兩頁的內容，但手機的屏幕一次只能顯示一頁的內容，因此兩個頁面需要分開顯示。
+#### 如何才能判斷程序應該是使用雙頁模式還是單頁模式呢？
+* 這就需要藉助限定符了(Qualifiiers)來實現了。
+* 代碼如下所示：
+
+```xml
+    <fragment
+        android:id="@+id/left_fragment"
+        android:name="com.example.dell.fragment.LeftFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <fragment
+        android:id="@+id/right_fragment"
+        android:name="com.example.dell.fragment.RightFragment"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3" />
+
+    <!--<FrameLayout
+        android:id="@+id/right_layout"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+    </FrameLayout>-->
+</LinearLayout>
+
+```
+>**從上面的代碼可以看到：**layout/activity_main佈局中只包含了一個碎片，即單頁模式，而layout-large/activity_main佈局包含了兩個碎片，即為雙頁模式。其中**large**就是一個**限定符。**那些屏幕被認為是large的設備就會自動加載layout-large文件夾下的佈局，而小屏幕設備則還是會加載layout文件夾下的佈局---------------------------------------------------------------------------------**
+#### 注：運行前需要將MainActivity中replaceFragment()方法裡面的代碼注釋掉，並且在平板模擬器上重新運行程序
